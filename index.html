@@ -4,42 +4,39 @@
 <meta charset="UTF-8">
 <title>被害集計グラフ</title>
 
-<!-- ArcGIS -->
+<!-- ArcGIS（先に読み込む） -->
 <script src="https://js.arcgis.com/4.29/"></script>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- ラベル表示 -->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 20px;
-  }
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
 
-  .summary {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+.summary {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
 
-  .card {
-    flex: 1;
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-    text-align: center;
-    font-weight: bold;
-  }
+.card {
+  flex: 1;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+}
 
-  .zennkai { background:#8B0000; }
-  .hankai { background:#FF1744; }
-  .ichibu { background:#FF9800; }
-  .yukau { background:#9E9E9E; }
-  .yukashita { background:#616161; }
+.zennkai { background:#8B0000; }
+.hankai { background:#FF1744; }
+.ichibu { background:#FF9800; }
+.yukau { background:#9E9E9E; }
+.yukashita { background:#616161; }
 
+canvas {
+  max-width: 100%;
+}
 </style>
 </head>
 
@@ -47,11 +44,11 @@
 
 <h2>住家被害情報</h2>
 
-<!-- 上部カード -->
+<!-- サマリー -->
 <div class="summary">
   <div class="card zennkai">全壊<br><span id="全壊">0</span>件</div>
   <div class="card hankai">半壊<br><span id="半壊">0</span>件</div>
-  <div class="card ichibu">一部破損<br><span id="一部破損">0</span>件</div>
+  <div class="card ichibu">一部損壊<br><span id="一部損壊">0</span>件</div>
   <div class="card yukau">床上浸水<br><span id="床上浸水">0</span>件</div>
   <div class="card yukashita">床下浸水<br><span id="床下浸水">0</span>件</div>
 </div>
@@ -61,128 +58,138 @@
 <script>
 require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
 
-  const layer = new FeatureLayer({
-    url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
-  });
-  const query = layer.createQuery();
-  query.outFields = ["ward", "damage"]; // ★フィールド名変更してね
-  query.returnGeometry = false;
+  // ★ Chart.jsを後から読み込む（競合回避）
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/chart.js";
 
-  layer.queryFeatures(query).then(function (result) {
+  script.onload = function () {
 
-  console.log(result.features[0].attributes);
+    const layer = new FeatureLayer({
+      url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
+    });
 
-  const features = result.features;
+    const query = layer.createQuery();
+    query.outFields = ["*"];
+    query.returnGeometry = false;
 
-  // =====================
-  // 「該当なし」除外
-  // =====================
-  const validFeatures = features.filter(f =>
-    f.attributes["区市町村名"] !== "該当なし"
-  );
+    layer.queryFeatures(query).then(function (result) {
 
-  // =====================
-  // X軸（区市町村）
-  // =====================
-  const labels = validFeatures.map(f =>
-    f.attributes["区市町村名"]
-  );
+      console.log(result.features[0].attributes);
 
-  // =====================
-  // datasets（そのまま使う）
-  // =====================
-  const datasets = [
-    {
-      label: "全壊",
-      data: validFeatures.map(f => f.attributes["全壊"] || 0),
-      backgroundColor: "#8B0000"
-    },
-    {
-      label: "半壊",
-      data: validFeatures.map(f => f.attributes["半壊"] || 0),
-      backgroundColor: "#FF1744"
-    },
-    {
-      label: "一部損壊",
-      data: validFeatures.map(f => f.attributes["一部損壊"] || 0),
-      backgroundColor: "#FF9800"
-    },
-    {
-      label: "床上浸水",
-      data: validFeatures.map(f => f.attributes["床上浸水"] || 0),
-      backgroundColor: "#9E9E9E"
-    },
-    {
-      label: "床下浸水",
-      data: validFeatures.map(f => f.attributes["床下浸水"] || 0),
-      backgroundColor: "#616161"
-    }
-  ];
+      const features = result.features;
 
-  // =====================
-  // サマリー（カード）
-  // =====================
-  const summary = {
-    "全壊": 0,
-    "半壊": 0,
-    "一部損壊": 0,
-    "床上浸水": 0,
-    "床下浸水": 0
+      // =====================
+      // 「該当なし」除外
+      // =====================
+      const validFeatures = features.filter(f =>
+        f.attributes["区市町村名"] !== "該当なし"
+      );
+
+      // =====================
+      // X軸（区市町村）
+      // =====================
+      const labels = validFeatures.map(f =>
+        f.attributes["区市町村名"]
+      );
+
+      // =====================
+      // データセット
+      // =====================
+      const datasets = [
+        {
+          label: "全壊",
+          data: validFeatures.map(f => f.attributes["全壊"] || 0),
+          backgroundColor: "#8B0000"
+        },
+        {
+          label: "半壊",
+          data: validFeatures.map(f => f.attributes["半壊"] || 0),
+          backgroundColor: "#FF1744"
+        },
+        {
+          label: "一部損壊",
+          data: validFeatures.map(f => f.attributes["一部損壊"] || 0),
+          backgroundColor: "#FF9800"
+        },
+        {
+          label: "床上浸水",
+          data: validFeatures.map(f => f.attributes["床上浸水"] || 0),
+          backgroundColor: "#9E9E9E"
+        },
+        {
+          label: "床下浸水",
+          data: validFeatures.map(f => f.attributes["床下浸水"] || 0),
+          backgroundColor: "#616161"
+        }
+      ];
+
+      // =====================
+      // サマリー計算
+      // =====================
+      const summary = {
+        "全壊": 0,
+        "半壊": 0,
+        "一部損壊": 0,
+        "床上浸水": 0,
+        "床下浸水": 0
+      };
+
+      validFeatures.forEach(f => {
+        summary["全壊"] += f.attributes["全壊"] || 0;
+        summary["半壊"] += f.attributes["半壊"] || 0;
+        summary["一部損壊"] += f.attributes["一部損壊"] || 0;
+        summary["床上浸水"] += f.attributes["床上浸水"] || 0;
+        summary["床下浸水"] += f.attributes["床下浸水"] || 0;
+      });
+
+      Object.keys(summary).forEach(k => {
+        document.getElementById(k).innerText = summary[k];
+      });
+
+      // =====================
+      // グラフ描画
+      // =====================
+      const ctx = document.getElementById("myChart").getContext("2d");
+
+      new window.Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              title: {
+                display: true,
+                text: "区市町村"
+              }
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "件数"
+              }
+            }
+          }
+        }
+      });
+
+    });
+
   };
 
-  validFeatures.forEach(f => {
-    summary["全壊"] += f.attributes["全壊"] || 0;
-    summary["半壊"] += f.attributes["半壊"] || 0;
-    summary["一部損壊"] += f.attributes["一部損壊"] || 0;
-    summary["床上浸水"] += f.attributes["床上浸水"] || 0;
-    summary["床下浸水"] += f.attributes["床下浸水"] || 0;
-  });
+  document.body.appendChild(script);
 
-  Object.keys(summary).forEach(k => {
-    document.getElementById(k).innerText = summary[k];
-  });
-
-  // =====================
-  // グラフ描画
-  // =====================
-  const ctx = document.getElementById("myChart").getContext("2d");
-
-  new window.Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
-    plugins: [ChartDataLabels],
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "bottom" },
-        datalabels: {
-          color: "#fff"
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          title: {
-            display: true,
-            text: "区市町村"
-          }
-        },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "件数"
-          }
-        }
-      }
-    }
-  });
-
-  });
 });
 </script>
 
