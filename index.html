@@ -29,6 +29,7 @@
   </div>    
 
 <script>
+Chart.register(ChartDataLabels);
 require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
 
   // レイヤー or テーブル
@@ -105,35 +106,35 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-    legend: {
-    labels: {
-      font: { size: 24 }
-          }
-        },
-        datalabels: {
-          color: "#fff",
-          font: {
-            size: 22,
-            weight: "bold"
-          }
+      legend: {
+        labels: {
+          font: { size: 24 }
         }
       },
-      scales: {   // ← pluginsの外！
-        x: {
-          stacked: true,
-          ticks: {
-            font: { size: 24 }
-          }
-        },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          ticks: {
-            font: { size: 24 }
-          }
+      datalabels: {
+        color: "#fff",
+        font: {
+          size: 22,
+          weight: "bold"
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: {
+          font: { size: 24 }
+        }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          font: { size: 24 }
         }
       }
     }
+  }
 });
 
     function createChart(id, type, labels, values) {
