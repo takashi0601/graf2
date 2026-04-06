@@ -64,13 +64,12 @@ require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
   const layer = new FeatureLayer({
     url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
   });
-  console.log(result.features[0].attributes);
   const query = layer.createQuery();
   query.outFields = ["ward", "damage"]; // ★フィールド名変更してね
   query.returnGeometry = false;
 
   layer.queryFeatures(query).then(function (result) {
-
+　　console.log(result.features[0].attributes);
     const features = result.features;
 
     // =====================
