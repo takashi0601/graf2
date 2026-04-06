@@ -49,7 +49,7 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
   const 半壊配列 = [];
   const 一部損壊配列 = [];
   const 床上浸水配列 = [];
-  const 一部損壊配列 = [];
+  const 床下浸水配列 = [];
 
   res.features.slice(1, 7).forEach((f, index) => {
 
@@ -85,13 +85,11 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
       {
         label: "一部損壊",
         data: 一部損壊配列
-      }
-      ,
+      },
       {
         label: "床上浸水",
         data: 床上浸水配列
-      }
-      ,
+      },
       {
         label: "床下浸水",
         data: 床下浸水配列
