@@ -1,80 +1,138 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>積み上げグラフ</title>
+  <meta charset="utf-8">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+  <!-- ArcGIS Maps SDK for JavaScript -->
+  <script src="https://js.arcgis.com/4.29/"></script>
+
+  <style>
+    body { font-family: Arial; }
+    .container { display: flex; flex-wrap: wrap; align-items: center; gap: 30px; }
+    canvas { width: 700px !important; height: 300px !important; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; }
+    #legendBox { font-size: 18px; }
+    .legend-item { margin-bottom: 10px; }
+    .legend-color { display: inline-block;  width: 14px;  height: 14px;  margin-right: 8px; }
+  </style>
+  
 </head>
+
 <body>
+  <div class="container">
+    <canvas id="barChart" ></canvas> <!-- 棒グラフ -->
+  </div>    
 
-  <h2>被害状況（積み上げ）</h2>
-  <canvas id="myChart"></canvas>
+<script>
+require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
 
-  <script>
-    // ★ ArcGIS Online レイヤーURL
-    const url = "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0";
+  // レイヤー or テーブル
+  const layer = new FeatureLayer({
+    url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
+  });
 
-    const params = {
-      where: "1=1",
-      outFields: "city_name, zenkai, hankai",
-      returnGeometry: false,
-      f: "json"
-    };
+  let charts = [];
 
-    fetch(url + "?" + new URLSearchParams(params))
-      .then(res => res.json())
-      .then(data => {
+  layer.queryFeatures({
+    where: "1=1",
+    outFields: ["*"],
+    returnGeometry: false
+  }).then(res => {
 
-        const features = data.features;
+  const labels = [];
+  const 全壊配列 = [];
+  const 半壊配列 = [];
+  const 一部損壊配列 = [];
 
-        // データ整形
-        const labels = features.map(f => f.attributes.FIRST_N03_004);
-        const zenkai = features.map(f => f.attributes.zenkai || 0);
-        const hankai = features.map(f => f.attributes.hankai || 0);
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '';
 
-        drawChart(labels, zenkai, hankai);
-      })
-      .catch(err => {
-        console.error("データ取得エラー:", err);
-      });
+  res.features.forEach((f, index) => {
 
-    function drawChart(labels, zenkai, hankai) {
-      const ctx = document.getElementById("myChart");
+    const 全壊 = Number(f.attributes["zenkai"]) || 0;
+    const 半壊 = Number(f.attributes["hankai"]) || 0;
+    const 一部損壊 = Number(f.attributes["ichibu_sonkai"]) || 0;
 
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "全壊",
-              data: zenkai,
-              backgroundColor: "rgba(255, 99, 132, 0.7)"
-            },
-            {
-              label: "半壊",
-              data: hankai,
-              backgroundColor: "rgba(54, 162, 235, 0.7)"
+    labels.push("No." + (index + 1));
+
+    全壊配列.push(全壊数);
+    半壊配列.push(半壊);
+    一部損壊配列.push(一部損壊);
+  });
+
+  // ===== 棒グラフ =====
+  new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: "全壊",
+        data: 全壊配列
+      },
+      {
+        label: "半壊",
+        data: 半壊配列
+      },
+      {
+        label: "一部損壊",
+        data: 一部損壊配列
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          font: { size: 24 }
+        }
+      }
+    },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+            font: {
+              size: 24
             }
-          ]
+          }
         },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              stacked: true
-            },
-            y: {
-              stacked: true,
-              beginAtZero: true
+        y: {
+          stacked: true,
+          beginAtZero: true
+          ticks: {
+            font: {
+              size: 24
             }
           }
         }
+      }
+  });
+});
+
+    function createChart(id, type, labels, values) {
+      const el = document.getElementById(id);
+
+      new Chart(el, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values
+          }]
+        }
       });
     }
-  </script>
+
+  });
+</script>
 
 </body>
 </html>
