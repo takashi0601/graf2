@@ -105,35 +105,31 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        labels: {
-          font: { size: 24 }
-        }
-      }
-    },
-    datalabels: {
-        // display: false,
-        color: "#fff",
-        font: {
-          size: 22,
-          weight: "bold"
-        }
-      ,
-      scales: {
-        x: {
-          stacked: true,
-          ticks: {
+    legend: {
+      labels: {
+        font: { size: 24 }
+            }
+          },
+          datalabels: {
+            color: "#fff",
             font: {
-              size: 24
+              size: 22,
+              weight: "bold"
             }
           }
         },
-        y: {
-          stacked: true,
-          beginAtZero: true,
-          ticks: {
-            font: {
-              size: 24
+        scales: {   // ← pluginsの外！
+          x: {
+            stacked: true,
+            ticks: {
+              font: { size: 24 }
+            }
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: {
+              font: { size: 24 }
             }
           }
         }
