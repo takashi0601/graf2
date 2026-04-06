@@ -49,9 +49,6 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
   const 半壊配列 = [];
   const 一部損壊配列 = [];
 
-  const tbody = document.querySelector('#dataTable tbody');
-  tbody.innerHTML = '';
-
   res.features.forEach((f, index) => {
 
     const 全壊 = Number(f.attributes["zenkai"]) || 0;
