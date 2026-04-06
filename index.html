@@ -39,7 +39,7 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
   let charts = [];
 
   layer.queryFeatures({
-    where: "1=1",
+    where: "FIRST_N03_004 IN ('港区','新宿区','杉並区','世田谷区','千代田区','足立区','大田区','品川区','豊島区')",
     outFields: ["*"],
     returnGeometry: false
   }).then(res => {
@@ -51,7 +51,7 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
   const 床上浸水配列 = [];
   const 床下浸水配列 = [];
 
-  res.features.slice(1, 7).forEach((f, index) => {
+  res.features.forEach((f, index) => {
 
     const 全壊 = Number(f.attributes["zenkai"]) || 0;
     const 半壊 = Number(f.attributes["hankai"]) || 0;
