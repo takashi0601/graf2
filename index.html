@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>被害集計グラフ</title>
+
+<!-- ArcGIS -->
+<script src="https://js.arcgis.com/4.29/"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ラベル表示 -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+  }
+
+  .summary {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    flex: 1;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .zennkai { background:#8B0000; }
+  .hankai { background:#FF1744; }
+  .ichibu { background:#FF9800; }
+  .yukau { background:#9E9E9E; }
+  .yukashita { background:#616161; }
+
+</style>
+</head>
+
+<body>
+
+<h2>住家被害情報</h2>
+
+<!-- 上部カード -->
+<div class="summary">
+  <div class="card zennkai">全壊<br><span id="全壊">0</span>件</div>
+  <div class="card hankai">半壊<br><span id="半壊">0</span>件</div>
+  <div class="card ichibu">一部破損<br><span id="一部破損">0</span>件</div>
+  <div class="card yukau">床上浸水<br><span id="床上浸水">0</span>件</div>
+  <div class="card yukashita">床下浸水<br><span id="床下浸水">0</span>件</div>
+</div>
+
+<canvas id="myChart"></canvas>
+
+<script>
+require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
+
+  const layer = new FeatureLayer({
+    url: "https://services.arcgis.com/xxxx/FeatureServer/0"
+  });
+
+  const query = layer.createQuery();
+  query.outFields = ["ward", "damage"]; // ★フィールド名変更してね
+  query.returnGeometry = false;
+
+  layer.queryFeatures(query).then(function (result) {
+
+    const features = result.features;
+
+    // =====================
+    // 集計
+    // =====================
+    const dataMap = {};
+    const summary = {
+      "全壊": 0,
+      "半壊": 0,
+      "一部破損": 0,
+      "床上浸水": 0,
+      "床下浸水": 0
+    };
+
+    features.forEach(f => {
+      const ward = f.attributes.ward;
+      const damage = f.attributes.damage;
+
+      // サマリー
+      if (summary[damage] !== undefined) {
+        summary[damage]++;
+      }
+
+      // グラフ用
+      if (!dataMap[ward]) dataMap[ward] = {};
+      if (!dataMap[ward][damage]) dataMap[ward][damage] = 0;
+
+      dataMap[ward][damage]++;
+    });
+
+    // =====================
+    // カード表示
+    // =====================
+    Object.keys(summary).forEach(k => {
+      document.getElementById(k).innerText = summary[k];
+    });
+
+    // =====================
+    // グラフデータ
+    // =====================
+    const labels = Object.keys(dataMap);
+
+    const damageTypes = [
+      "全壊",
+      "半壊",
+      "一部破損",
+      "床上浸水",
+      "床下浸水"
+    ];
+
+    const colors = {
+      "全壊": "#8B0000",
+      "半壊": "#FF1744",
+      "一部破損": "#FF9800",
+      "床上浸水": "#9E9E9E",
+      "床下浸水": "#616161"
+    };
+
+    const datasets = damageTypes.map(type => ({
+      label: type,
+      data: labels.map(l => dataMap[l][type] || 0),
+      backgroundColor: colors[type]
+    }));
+
+    // =====================
+    // グラフ描画
+    // =====================
+    const ctx = document.getElementById("myChart");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      plugins: [ChartDataLabels],
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom" },
+          datalabels: {
+            color: "#fff",
+            anchor: "center"
+          }
+        },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, beginAtZero: true }
+        }
+      }
+    });
+
+  });
+
+});
+</script>
+
+</body>
+</html>
