@@ -137,9 +137,9 @@ require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
     // =====================
     // グラフ描画
     // =====================
-    const ctx = document.getElementById("myChart");
+    const ctx = document.getElementById("myChart").getContext("2d");
 
-    new Chart(ctx, {
+    new window.Chart(ctx, {
       type: "bar",
       data: {
         labels: labels,
@@ -161,7 +161,7 @@ require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
         }
       }
     });
-
+    
   });
 
 });
