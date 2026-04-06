@@ -69,98 +69,120 @@ require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
   query.returnGeometry = false;
 
   layer.queryFeatures(query).then(function (result) {
-　　console.log(result.features[0].attributes);
-    const features = result.features;
 
-    // =====================
-    // 集計
-    // =====================
-    const dataMap = {};
-    const summary = {
-      "全壊": 0,
-      "半壊": 0,
-      "一部破損": 0,
-      "床上浸水": 0,
-      "床下浸水": 0
-    };
+  console.log(result.features[0].attributes);
 
-    features.forEach(f => {
-      const ward = f.attributes.ADM2_NAME;
-      const damage = "全壊"; // 仮（今はデータ無いので）
+  const features = result.features;
 
-      // サマリー
-      if (summary[damage] !== undefined) {
-        summary[damage]++;
-      }
+  // =====================
+  // 「該当なし」除外
+  // =====================
+  const validFeatures = features.filter(f =>
+    f.attributes["区市町村名"] !== "該当なし"
+  );
 
-      // グラフ用
-      if (!dataMap[ward]) dataMap[ward] = {};
-      if (!dataMap[ward][damage]) dataMap[ward][damage] = 0;
+  // =====================
+  // X軸（区市町村）
+  // =====================
+  const labels = validFeatures.map(f =>
+    f.attributes["区市町村名"]
+  );
 
-      dataMap[ward][damage]++;
-    });
+  // =====================
+  // datasets（そのまま使う）
+  // =====================
+  const datasets = [
+    {
+      label: "全壊",
+      data: validFeatures.map(f => f.attributes["全壊"] || 0),
+      backgroundColor: "#8B0000"
+    },
+    {
+      label: "半壊",
+      data: validFeatures.map(f => f.attributes["半壊"] || 0),
+      backgroundColor: "#FF1744"
+    },
+    {
+      label: "一部損壊",
+      data: validFeatures.map(f => f.attributes["一部損壊"] || 0),
+      backgroundColor: "#FF9800"
+    },
+    {
+      label: "床上浸水",
+      data: validFeatures.map(f => f.attributes["床上浸水"] || 0),
+      backgroundColor: "#9E9E9E"
+    },
+    {
+      label: "床下浸水",
+      data: validFeatures.map(f => f.attributes["床下浸水"] || 0),
+      backgroundColor: "#616161"
+    }
+  ];
 
-    // =====================
-    // カード表示
-    // =====================
-    Object.keys(summary).forEach(k => {
-      document.getElementById(k).innerText = summary[k];
-    });
+  // =====================
+  // サマリー（カード）
+  // =====================
+  const summary = {
+    "全壊": 0,
+    "半壊": 0,
+    "一部損壊": 0,
+    "床上浸水": 0,
+    "床下浸水": 0
+  };
 
-    // =====================
-    // グラフデータ
-    // =====================
-    const labels = Object.keys(dataMap);
+  validFeatures.forEach(f => {
+    summary["全壊"] += f.attributes["全壊"] || 0;
+    summary["半壊"] += f.attributes["半壊"] || 0;
+    summary["一部損壊"] += f.attributes["一部損壊"] || 0;
+    summary["床上浸水"] += f.attributes["床上浸水"] || 0;
+    summary["床下浸水"] += f.attributes["床下浸水"] || 0;
+  });
 
-    const damageTypes = [
-      "全壊",
-      "半壊",
-      "一部破損",
-      "床上浸水",
-      "床下浸水"
-    ];
+  Object.keys(summary).forEach(k => {
+    document.getElementById(k).innerText = summary[k];
+  });
 
-    const colors = {
-      "全壊": "#8B0000",
-      "半壊": "#FF1744",
-      "一部破損": "#FF9800",
-      "床上浸水": "#9E9E9E",
-      "床下浸水": "#616161"
-    };
+  // =====================
+  // グラフ描画
+  // =====================
+  const ctx = document.getElementById("myChart").getContext("2d");
 
-    const datasets = damageTypes.map(type => ({
-      label: type,
-      data: labels.map(l => dataMap[l][type] || 0),
-      backgroundColor: colors[type]
-    }));
-
-    // =====================
-    // グラフ描画
-    // =====================
-    const ctx = document.getElementById("myChart").getContext("2d");
-
-    new window.Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: datasets
+  new window.Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" },
+        datalabels: {
+          color: "#fff"
+        }
       },
-      plugins: [ChartDataLabels],
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: "bottom" },
-          datalabels: {
-            color: "#fff",
-            anchor: "center"
+      scales: {
+        x: {
+          stacked: true,
+          title: {
+            display: true,
+            text: "区市町村"
           }
         },
-        scales: {
-          x: { stacked: true },
-          y: { stacked: true, beginAtZero: true }
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "件数"
+          }
         }
       }
-    });
+    }
+  });
+
+});
     
   });
 
