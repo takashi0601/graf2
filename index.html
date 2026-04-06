@@ -1,189 +1,80 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>被害集計グラフ</title>
+  <meta charset="UTF-8">
+  <title>積み上げグラフ</title>
 
-<!-- ArcGIS -->
-<script src="https://js.arcgis.com/4.29/"></script>
-
-<style>
-body {
-  font-family: sans-serif;
-  margin: 20px;
-}
-
-.summary {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.card {
-  flex: 1;
-  color: white;
-  padding: 10px;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.zennkai { background:#8B0000; }
-.hankai { background:#FF1744; }
-.ichibu { background:#FF9800; }
-.yukau { background:#9E9E9E; }
-.yukashita { background:#616161; }
-
-canvas {
-  max-width: 100%;
-}
-</style>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-<h2>住家被害情報</h2>
+  <h2>被害状況（積み上げ）</h2>
+  <canvas id="myChart"></canvas>
 
-<div class="summary">
-  <div class="card zennkai">全壊<br><span id="全壊">0</span>件</div>
-  <div class="card hankai">半壊<br><span id="半壊">0</span>件</div>
-  <div class="card ichibu">一部損壊<br><span id="一部損壊">0</span>件</div>
-  <div class="card yukau">床上浸水<br><span id="床上浸水">0</span>件</div>
-  <div class="card yukashita">床下浸水<br><span id="床下浸水">0</span>件</div>
-</div>
+  <script>
+    // ★ ArcGIS Online レイヤーURL
+    const url = "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0";
 
-<canvas id="myChart"></canvas>
+    const params = {
+      where: "1=1",
+      outFields: "city_name, zenkai, hankai",
+      returnGeometry: false,
+      f: "json"
+    };
 
-<script>
-require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
+    fetch(url + "?" + new URLSearchParams(params))
+      .then(res => res.json())
+      .then(data => {
 
-  // ★ Chart.jsを後から読み込む（競合回避）
-  const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/chart.js";
+        const features = data.features;
 
-  script.onload = function () {
+        // データ整形
+        const labels = features.map(f => f.attributes.FIRST_N03_004);
+        const zenkai = features.map(f => f.attributes.zenkai || 0);
+        const hankai = features.map(f => f.attributes.hankai || 0);
 
-    const layer = new FeatureLayer({
-      url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
-    });
-
-    const query = layer.createQuery();
-    query.outFields = ["*"];
-    query.returnGeometry = false;
-
-    layer.queryFeatures(query).then(function (result) {
-
-      const features = result.features;
-
-      console.log(features[0].attributes); // デバッグ
-
-      // =====================
-      // X軸（区市町村）
-      // =====================
-      const labels = features.map(f =>
-        f.attributes["FIRST_N03_004"]
-      );
-
-      // =====================
-      // データセット（数値変換付き）
-      // =====================
-      const datasets = [
-        {
-          label: "全壊",
-          data: features.map(f => Number(f.attributes["zenkai"]) || 0),
-          backgroundColor: "#8B0000"
-        },
-        {
-          label: "半壊",
-          data: features.map(f => Number(f.attributes["hankai"]) || 0),
-          backgroundColor: "#FF1744"
-        },
-        {
-          label: "一部損壊",
-          data: features.map(f => Number(f.attributes["ichibu_sonkai"]) || 0),
-          backgroundColor: "#FF9800"
-        },
-        {
-          label: "床上浸水",
-          data: features.map(f => Number(f.attributes["shinsui"]) || 0),
-          backgroundColor: "#9E9E9E"
-        },
-        {
-          label: "床下浸水",
-          data: features.map(f => Number(f.attributes["床下浸水"]) || 0),
-          backgroundColor: "#616161"
-        }
-      ];
-
-      // =====================
-      // サマリー
-      // =====================
-      const summary = {
-        "全壊": 0,
-        "半壊": 0,
-        "一部損壊": 0,
-        "床上浸水": 0,
-        "床下浸水": 0
-      };
-
-      features.forEach(f => {
-        summary["全壊"] += Number(f.attributes["zenkai"]) || 0;
-        summary["半壊"] += Number(f.attributes["hankai"]) || 0;
-        summary["一部損壊"] += Number(f.attributes["ichibu_sonkai"]) || 0;
-        summary["床上浸水"] += Number(f.attributes["shinsui"]) || 0;
-        summary["床下浸水"] += Number(f.attributes["床下浸水"]) || 0;
+        drawChart(labels, zenkai, hankai);
+      })
+      .catch(err => {
+        console.error("データ取得エラー:", err);
       });
 
-      Object.keys(summary).forEach(k => {
-        document.getElementById(k).innerText = summary[k];
-      });
+    function drawChart(labels, zenkai, hankai) {
+      const ctx = document.getElementById("myChart");
 
-      // =====================
-      // グラフ描画
-      // =====================
-      const ctx = document.getElementById("myChart").getContext("2d");
-
-      new window.Chart(ctx, {
+      new Chart(ctx, {
         type: "bar",
         data: {
           labels: labels,
-          datasets: datasets
+          datasets: [
+            {
+              label: "全壊",
+              data: zenkai,
+              backgroundColor: "rgba(255, 99, 132, 0.7)"
+            },
+            {
+              label: "半壊",
+              data: hankai,
+              backgroundColor: "rgba(54, 162, 235, 0.7)"
+            }
+          ]
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom"
-            }
-          },
           scales: {
             x: {
-              stacked: true,
-              title: {
-                display: true,
-                text: "区市町村"
-              }
+              stacked: true
             },
             y: {
               stacked: true,
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: "件数"
-              }
+              beginAtZero: true
             }
           }
         }
       });
-
-    });
-
-  };
-
-  document.body.appendChild(script);
-
-});
-</script>
+    }
+  </script>
 
 </body>
 </html>
