@@ -48,18 +48,24 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
   const 全壊配列 = [];
   const 半壊配列 = [];
   const 一部損壊配列 = [];
+  const 床上浸水配列 = [];
+  const 一部損壊配列 = [];
 
   res.features.slice(1, 7).forEach((f, index) => {
 
     const 全壊 = Number(f.attributes["zenkai"]) || 0;
     const 半壊 = Number(f.attributes["hankai"]) || 0;
     const 一部損壊 = Number(f.attributes["ichibu_sonkai"]) || 0;
+    const 床上浸水 = Number(f.attributes["shinsui"]) || 0;
+    const 床下浸水 = Number(f.attributes["床下浸水"]) || 0;
 
-    labels.push("No." + (index + 1));
+    labels.push(f.attributes["FIRST_N03_004"]);
 
     全壊配列.push(全壊);
     半壊配列.push(半壊);
     一部損壊配列.push(一部損壊);
+    床上浸水配列.push(床上浸水);
+    床下浸水配列.push(床下浸水);
   });
 
   // ===== 棒グラフ =====
@@ -79,6 +85,16 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
       {
         label: "一部損壊",
         data: 一部損壊配列
+      }
+      ,
+      {
+        label: "床上浸水",
+        data: 床上浸水配列
+      }
+      ,
+      {
+        label: "床下浸水",
+        data: 床下浸水配列
       }
     ]
   },
