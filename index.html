@@ -106,36 +106,34 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     maintainAspectRatio: false,
     plugins: {
     legend: {
-      labels: {
-        font: { size: 24 }
-            }
-          },
-          datalabels: {
-            color: "#fff",
-            font: {
-              size: 22,
-              weight: "bold"
-            }
+    labels: {
+      font: { size: 24 }
           }
         },
-        scales: {   // ← pluginsの外！
-          x: {
-            stacked: true,
-            ticks: {
-              font: { size: 24 }
-            }
-          },
-          y: {
-            stacked: true,
-            beginAtZero: true,
-            ticks: {
-              font: { size: 24 }
-            }
+        datalabels: {
+          color: "#fff",
+          font: {
+            size: 22,
+            weight: "bold"
+          }
+        }
+      },
+      scales: {   // ← pluginsの外！
+        x: {
+          stacked: true,
+          ticks: {
+            font: { size: 24 }
+          }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: {
+            font: { size: 24 }
           }
         }
       }
     }
-  }
 });
 
     function createChart(id, type, labels, values) {
