@@ -85,8 +85,8 @@ require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
     };
 
     features.forEach(f => {
-      const ward = f.attributes.ward;
-      const damage = f.attributes.damage;
+      const ward = f.attributes.ADM2_NAME;
+      const damage = "全壊"; // 仮（今はデータ無いので）
 
       // サマリー
       if (summary[damage] !== undefined) {
