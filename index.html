@@ -113,6 +113,9 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
       },
       datalabels: {
         color: "#fff",
+        formatter: function(value) {
+          return value === 0 ? "" : value;
+        },
         font: {
           size: 22,
           weight: "bold"
