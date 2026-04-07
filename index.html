@@ -105,12 +105,11 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     const 床上浸水配列 = [];
     const 床下浸水配列 = [];
 
-    // ★ 合計用
-    let sum全壊 = 0;
-    let sum半壊 = 0;
-    let sum一部 = 0;
-    let sum床上 = 0;
-    let sum床下 = 0;
+    // let sum全壊 = 0;
+    // let sum半壊 = 0;
+    // let sum一部 = 0;
+    // let sum床上 = 0;
+    // let sum床下 = 0;
 
     res.features.forEach(f => {
 
@@ -128,20 +127,19 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
       床上浸水配列.push(床上浸水);
       床下浸水配列.push(床下浸水);
 
-      // ★ 合計
-      sum全壊 += 全壊;
-      sum半壊 += 半壊;
-      sum一部 += 一部損壊;
-      sum床上 += 床上浸水;
-      sum床下 += 床下浸水;
+      // sum全壊 += 全壊;
+      // sum半壊 += 半壊;
+      // sum一部 += 一部損壊;
+      // sum床上 += 床上浸水;
+      // sum床下 += 床下浸水;
     });
 
-    // ★ カードに反映
-    document.getElementById("全壊").textContent = sum全壊;
-    document.getElementById("半壊").textContent = sum半壊;
-    document.getElementById("一部破損").textContent = sum一部;
-    document.getElementById("床上浸水").textContent = sum床上;
-    document.getElementById("床下浸水").textContent = sum床下;
+    // カードに反映
+    // document.getElementById("全壊").textContent = sum全壊;
+    // document.getElementById("半壊").textContent = sum半壊;
+    // document.getElementById("一部破損").textContent = sum一部;
+    // document.getElementById("床上浸水").textContent = sum床上;
+    // document.getElementById("床下浸水").textContent = sum床下;
 
     // ===== 棒グラフ =====
     new Chart(document.getElementById('barChart'), {
