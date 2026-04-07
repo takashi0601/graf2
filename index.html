@@ -56,6 +56,24 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     returnGeometry: false
   }).then(res => {
 
+    const order = [
+      "港区",
+      "新宿区",
+      "杉並区",
+      "世田谷区",
+      "千代田区",
+      "足立区",
+      "大田区",
+      "品川区",
+      "豊島区"
+    ];
+
+    res.features.sort((a, b) => {
+      const nameA = a.attributes["FIRST_N03_004"];
+      const nameB = b.attributes["FIRST_N03_004"];
+      return order.indexOf(nameA) - order.indexOf(nameB);
+    });
+
     const labels = [];
     const 全壊配列 = [];
     const 半壊配列 = [];
