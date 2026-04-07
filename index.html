@@ -35,7 +35,7 @@
 </head>
 
 <body>
-  <div class="summary">
+  <!-- <div class="summary">
     <div class="card zennkai">
       全壊<br>
       <img class="icon" src='other_houses_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png'>
@@ -61,7 +61,7 @@
       <span class="material-symbols-outlined image">Houseboat</span>
       <span id="床下浸水">0</span>件
     </div>
-  </div>
+  </div> -->
   <div class="container">
     <canvas id="barChart" ></canvas> <!-- 棒グラフ -->
   </div>    
@@ -184,6 +184,11 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
             labels: {
               font: { size: 24 }
             }
+          },
+          title: {
+            display: true,
+            text: "住家被害件数",
+            font: { size: 28 }
           },
           datalabels: {
             color: "#fff",
