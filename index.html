@@ -46,12 +46,9 @@
 Chart.register(ChartDataLabels);
 require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
 
-  // レイヤー or テーブル
   const layer = new FeatureLayer({
     url: "https://services9.arcgis.com/YtkgVT3n52Tm7z1d/arcgis/rest/services/moc_adminarea_dissolve_gdb/FeatureServer/0"
   });
-
-  let charts = [];
 
   layer.queryFeatures({
     where: "FIRST_N03_004 IN ('港区','新宿区','杉並区','世田谷区','千代田区','足立区','大田区','品川区','豊島区')",
@@ -59,114 +56,121 @@ require(["esri/layers/FeatureLayer"], function(FeatureLayer) {
     returnGeometry: false
   }).then(res => {
 
-  const labels = [];
-  const 全壊配列 = [];
-  const 半壊配列 = [];
-  const 一部損壊配列 = [];
-  const 床上浸水配列 = [];
-  const 床下浸水配列 = [];
+    const labels = [];
+    const 全壊配列 = [];
+    const 半壊配列 = [];
+    const 一部損壊配列 = [];
+    const 床上浸水配列 = [];
+    const 床下浸水配列 = [];
 
-  res.features.forEach((f, index) => {
+    // ★ 合計用
+    let sum全壊 = 0;
+    let sum半壊 = 0;
+    let sum一部 = 0;
+    let sum床上 = 0;
+    let sum床下 = 0;
 
-    const 全壊 = Number(f.attributes["zenkai"]) || 0;
-    const 半壊 = Number(f.attributes["hankai"]) || 0;
-    const 一部損壊 = Number(f.attributes["ichibu_sonkai"]) || 0;
-    const 床上浸水 = Number(f.attributes["shinsui"]) || 0;
-    const 床下浸水 = Number(f.attributes["床下浸水"]) || 0;
+    res.features.forEach(f => {
 
-    labels.push(f.attributes["FIRST_N03_004"]);
+      const 全壊 = Number(f.attributes["zenkai"]) || 0;
+      const 半壊 = Number(f.attributes["hankai"]) || 0;
+      const 一部損壊 = Number(f.attributes["ichibu_sonkai"]) || 0;
+      const 床上浸水 = Number(f.attributes["shinsui"]) || 0;
+      const 床下浸水 = Number(f.attributes["床下浸水"]) || 0;
 
-    全壊配列.push(全壊);
-    半壊配列.push(半壊);
-    一部損壊配列.push(一部損壊);
-    床上浸水配列.push(床上浸水);
-    床下浸水配列.push(床下浸水);
-  });
+      // 配列
+      labels.push(f.attributes["FIRST_N03_004"]);
+      全壊配列.push(全壊);
+      半壊配列.push(半壊);
+      一部損壊配列.push(一部損壊);
+      床上浸水配列.push(床上浸水);
+      床下浸水配列.push(床下浸水);
 
-  // ===== 棒グラフ =====
-  new Chart(document.getElementById('barChart'), {
-  type: 'bar',
-  data: {
-    labels: labels,
-    datasets: [
-      {
-        label: "全壊",
-        data: 全壊配列,
-        backgroundColor: "#b22222",
+      // ★ 合計
+      sum全壊 += 全壊;
+      sum半壊 += 半壊;
+      sum一部 += 一部損壊;
+      sum床上 += 床上浸水;
+      sum床下 += 床下浸水;
+    });
+
+    // ★ カードに反映
+    document.getElementById("全壊").textContent = sum全壊;
+    document.getElementById("半壊").textContent = sum半壊;
+    document.getElementById("一部破損").textContent = sum一部;
+    document.getElementById("床上浸水").textContent = sum床上;
+    document.getElementById("床下浸水").textContent = sum床下;
+
+    // ===== 棒グラフ =====
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "全壊",
+            data: 全壊配列,
+            backgroundColor: "#b22222",
+          },
+          {
+            label: "半壊",
+            data: 半壊配列,
+            backgroundColor: "#dc143c",
+          },
+          {
+            label: "一部損壊",
+            data: 一部損壊配列,
+            backgroundColor: "#ff9800",
+          },
+          {
+            label: "床上浸水",
+            data: 床上浸水配列,
+            backgroundColor: "#9E9E9E",
+          },
+          {
+            label: "床下浸水",
+            data: 床下浸水配列,
+            backgroundColor: "#616161",
+          }
+        ]
       },
-      {
-        label: "半壊",
-        data: 半壊配列,
-        backgroundColor: "#dc143c",
-      },
-      {
-        label: "一部損壊",
-        data: 一部損壊配列,
-        backgroundColor: "#ff9800",
-      },
-      {
-        label: "床上浸水",
-        data: 床上浸水配列,
-        backgroundColor: "#767676",
-      },
-      {
-        label: "床下浸水",
-        data: 床下浸水配列,
-        backgroundColor: "#767676",
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          font: { size: 24 }
-        }
-      },
-      datalabels: {
-        color: "#fff",
-        formatter: function(value) {
-          return value === 0 ? "" : value;
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              font: { size: 24 }
+            }
+          },
+          datalabels: {
+            color: "#fff",
+            formatter: function(value) {
+              return value === 0 ? "" : value;
+            },
+            font: {
+              size: 22,
+              weight: "bold"
+            }
+          }
         },
-        font: {
-          size: 22,
-          weight: "bold"
+        scales: {
+          x: {
+            stacked: true,
+            ticks: {
+              font: { size: 24 }
+            }
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: {
+              font: { size: 24 }
+            }
+          }
         }
       }
-    },
-    scales: {
-      x: {
-        stacked: true,
-        ticks: {
-          font: { size: 24 }
-        }
-      },
-      y: {
-        stacked: true,
-        beginAtZero: true,
-        ticks: {
-          font: { size: 24 }
-        }
-      }
-    }
-  }
-});
-
-    function createChart(id, type, labels, values) {
-      const el = document.getElementById(id);
-
-      new Chart(el, {
-        type: type,
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values
-          }]
-        }
-      });
-    }
+    });
   });
 });
 </script>
