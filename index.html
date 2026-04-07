@@ -19,12 +19,26 @@
     #legendBox { font-size: 18px; }
     .legend-item { margin-bottom: 10px; }
     .legend-color { display: inline-block;  width: 14px;  height: 14px;  margin-right: 8px; }
+    .summary { display: flex; gap: 10px; margin-bottom: 20px; }
+    .card { flex: 1; color: white; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; }
+    .zennkai { background:#8B0000; }
+    .hankai { background:#FF1744; }
+    .ichibu { background:#FF9800; }
+    .yukau { background:#9E9E9E; }
+    .yukashita { background:#616161; }
   </style>
   
 </head>
 
 <body>
   <div class="container">
+    <div class="summary">
+      <div class="card zennkai">全壊<br><span id="全壊">0</span>件</div>
+      <div class="card hankai">半壊<br><span id="半壊">0</span>件</div>
+      <div class="card ichibu">一部破損<br><span id="一部破損">0</span>件</div>
+      <div class="card yukau">床上浸水<br><span id="床上浸水">0</span>件</div>
+      <div class="card yukashita">床下浸水<br><span id="床下浸水">0</span>件</div>
+    </div>
     <canvas id="barChart" ></canvas> <!-- 棒グラフ -->
   </div>    
 
