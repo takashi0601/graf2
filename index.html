@@ -10,6 +10,8 @@
   <!-- ArcGIS Maps SDK for JavaScript -->
   <script src="https://js.arcgis.com/4.29/"></script>
 
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
   <style>
     body { font-family: Arial; }
     .container { display: flex; flex-wrap: wrap; align-items: center; gap: 30px; }
@@ -26,17 +28,18 @@
     .ichibu { background:#FF9800; }
     .yukau { background:#9E9E9E; }
     .yukashita { background:#616161; }
+    .icon-white { font-size: 32px; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48; color: white; }
   </style>
   
 </head>
 
 <body>
   <div class="summary">
-    <div class="card zennkai">全壊<br><span id="全壊">0</span>件</div>
-    <div class="card hankai">半壊<br><span id="半壊">0</span>件</div>
-    <div class="card ichibu">一部破損<br><span id="一部破損">0</span>件</div>
-    <div class="card yukau">床上浸水<br><span id="床上浸水">0</span>件</div>
-    <div class="card yukashita">床下浸水<br><span id="床下浸水">0</span>件</div>
+    <div class="card zennkai">全壊<br><span class="material-symbols-outlined">Other Houses</span><span id="全壊">0</span>件</div>
+    <div class="card hankai">半壊<br><span class="material-symbols-outlined">Other Houses</span><span id="半壊">0</span>件</div>
+    <div class="card ichibu">一部破損<br><span class="material-symbols-outlined">Other Houses</span><span id="一部破損">0</span>件</div>
+    <div class="card yukau">床上浸水<br><span class="material-symbols-outlined icon-white">Houseboat</span><span id="床上浸水">0</span>件</div>
+    <div class="card yukashita">床下浸水<br><span class="material-symbols-outlined">Houseboat</span><span id="床下浸水">0</span>件</div>
   </div>
   <div class="container">
     <canvas id="barChart" ></canvas> <!-- 棒グラフ -->
