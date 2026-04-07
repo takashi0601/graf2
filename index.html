@@ -28,17 +28,48 @@
     .ichibu { background:#FF9800; }
     .yukau { background:#9E9E9E; }
     .yukashita { background:#616161; }
+    .image { font-size: 36px; }
   </style>
   
 </head>
 
 <body>
   <div class="summary">
-    <div class="card zennkai">全壊<br><img src='other_houses_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png'><span id="全壊">0</span>件</div>
-    <div class="card hankai">半壊<br><span class="material-symbols-outlined">Other_Houses</span><span id="半壊">0</span>件</div>
-    <div class="card ichibu">一部破損<br><span class="material-symbols-outlined">Other_Houses</span><span id="一部破損">0</span>件</div>
-    <div class="card yukau">床上浸水<br><img src='houseboat_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png'><span id="床上浸水">0</span>件</div>
-    <div class="card yukashita">床下浸水<br><span class="material-symbols-outlined">Houseboat</span><span id="床下浸水">0</span>件</div>
+    <div class="card zennkai">
+      全壊<br>
+      <div class="container">
+        <img class="image" src='other_houses_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png'>
+        <span id="全壊">0</span>件
+      </div>
+    </div>
+    <div class="card hankai">
+      半壊<br>
+      <div class="container">
+        <span class="material-symbols-outlined image">Other_Houses</span>
+        <span id="半壊">0</span>件
+      </div>
+    </div>
+    <div class="card ichibu">
+      一部破損<br>
+      <div class="container">
+        <span class="material-symbols-outlined image">Other_Houses</span>
+        <span id="一部破損">0</span>件
+      </div>
+    </div>
+    <div class="card yukau">
+      床上浸水<br>
+      <div class="container">
+        <img src='houseboat_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png'>
+        <span id="床上浸水">0</span>件
+      </div>
+    </div>
+    <div class="card yukashita">
+      床下浸水<br>
+      <div class="container">
+        <span class="material-symbols-outlined image">Houseboat</span>
+        <span id="床下浸水">0</span>件
+      </div>
+    </div>
   </div>
   <div class="container">
     <canvas id="barChart" ></canvas> <!-- 棒グラフ -->
